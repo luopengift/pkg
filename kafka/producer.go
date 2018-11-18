@@ -75,7 +75,7 @@ func (p *Producer) WriteToTopic() error {
 					Value: sarama.ByteEncoder(message),
 				}
 				if partition, offset, err := producer.SendMessage(msg); err != nil {
-					log.Error("<write to kafka error,partition=%v,offset=%v> %v", partition, offset, err)
+					log.Error("<write to kafka error,partition=%v,offset=%v> %v, %v", partition, offset, err, string(message))
 				}
 				p.channel.Done()
 			}(message)
