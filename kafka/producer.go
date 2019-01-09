@@ -1,6 +1,8 @@
 package kafka
 
 import (
+	"context"
+
 	"github.com/Shopify/sarama"
 	"github.com/luopengift/golibs/channel"
 	"github.com/luopengift/log"
@@ -36,17 +38,19 @@ func (p *Producer) Write(msg []byte) (int, error) {
 }
 
 func (p *Producer) Close() error {
-	return p.Close()
+	close(p.Message)
+	return p.channel.Close()
+	//return p.Close()
 }
 
-func (p *Producer) Start() error {
+func (p *Producer) Start(ctx context.Context) error {
 	p.Message = make(chan []byte, p.MaxProcs)
 	p.channel = channel.NewChannel(p.MaxProcs)
-	go p.WriteToTopic()
+	go p.WriteToTopic(ctx)
 	return nil
 }
 
-func (p *Producer) WriteToTopic() error {
+func (p *Producer) WriteToTopic(ctx context.Context) error {
 
 	config := sarama.NewConfig()
 	config.ClientID = "TransportProducer"
@@ -63,8 +67,11 @@ func (p *Producer) WriteToTopic() error {
 	}
 	defer producer.Close()
 
+LOOP:
 	for {
 		select {
+		case <-ctx.Done():
+			break LOOP
 		case message := <-p.Message:
 			p.channel.Add()
 			go func(message []byte) {
@@ -81,6 +88,7 @@ func (p *Producer) WriteToTopic() error {
 			}(message)
 		}
 	}
+	return nil
 }
 
 func (p *Producer) Version() string {

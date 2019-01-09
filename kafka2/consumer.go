@@ -8,7 +8,6 @@ import (
 	"github.com/luopengift/types"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/luopengift/log"
 )
 
 const (
@@ -34,10 +33,12 @@ func NewConsumer() *Consumer {
 	return new(Consumer)
 }
 
+// Init init
 func (c *Consumer) Init(v interface{}) error {
 	return types.Format(v, c)
 }
 
+// LoadConfig load config
 func (c *Consumer) LoadConfig(f string) error {
 	return types.ParseConfigFile(c, f)
 }
@@ -64,12 +65,11 @@ LOOP:
 			//fmt.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value)[:60])
 		}
 	}
-	log.Warn("close client!")
-	close(c.Message)
-	return c.Consumer.Close()
+	return nil
 }
 
-func (c *Consumer) Start() error {
+// Start start
+func (c *Consumer) Start(ctx context.Context) error {
 	var err error
 	c.Message = make(chan []byte, 1000)
 
@@ -83,14 +83,17 @@ func (c *Consumer) Start() error {
 		return err
 	}
 	c.Consumer.SubscribeTopics(c.Topics, nil)
-	go c.readFromTopics(context.TODO())
+	go c.readFromTopics(ctx)
 	return nil
 }
 
+// Close close
 func (c *Consumer) Close() error {
-	return c.Close()
+	close(c.Message)
+	return c.Consumer.Close()
 }
 
+// Version version
 func (c *Consumer) Version() string {
 	return VERSION
 }
