@@ -1,9 +1,10 @@
-module github.com/luopengift/pkg/kafka
+module github.com/luopengift/pkg
 
 go 1.12
 
 require (
 	github.com/Shopify/sarama v1.22.1
+	github.com/confluentinc/confluent-kafka-go v1.0.0
 	github.com/luopengift/golibs v0.0.0-20181212060116-9db4afe6789a
 	github.com/luopengift/log v0.0.0-20190418080018-fdc6f849ef5d
 	github.com/luopengift/types v0.0.0-20190129081739-38e990d849fc
