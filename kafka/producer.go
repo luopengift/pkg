@@ -56,13 +56,13 @@ func (p *Producer) WriteToTopic(ctx context.Context) error {
 	config.ClientID = "TransportProducer"
 	config.Producer.Return.Successes = true
 	if err := config.Validate(); err != nil {
-		log.Error("<config error> %v", err)
+		log.Errorf("<config error> %v", err)
 		return err
 	}
 
 	producer, err := sarama.NewSyncProducer(p.Addrs, config)
 	if err != nil {
-		log.Error("<Failed to produce message> %v", err)
+		log.Errorf("<Failed to produce message> %v", err)
 		return err
 	}
 	defer producer.Close()
@@ -82,7 +82,7 @@ LOOP:
 					Value: sarama.ByteEncoder(message),
 				}
 				if partition, offset, err := producer.SendMessage(msg); err != nil {
-					log.Error("<write to kafka error,partition=%v,offset=%v> %v, %v", partition, offset, err, string(message))
+					log.Errorf("<write to kafka error,partition=%v,offset=%v> %v, %v", partition, offset, err, string(message))
 				}
 				p.channel.Done()
 			}(message)
